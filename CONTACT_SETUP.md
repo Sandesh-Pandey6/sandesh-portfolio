@@ -11,7 +11,7 @@ The contact form sends emails to **sandesh.pandey00112@gmail.com** using [Resend
 
 ## Step 2: Create `.env.local`
 
-1. In your project root (`d:\portifolio`), create a file named `.env.local`.
+1. In your project root, create a file named `.env.local`.
 2. Add this line (replace with your actual key):
 
 ```

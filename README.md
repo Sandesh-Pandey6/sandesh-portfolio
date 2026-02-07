@@ -38,4 +38,17 @@ npm run build
 npm start
 ```
 
+### Deploy to Vercel
+
+1. Push your code to GitHub (or GitLab/Bitbucket).
+2. Go to [vercel.com](https://vercel.com) and sign in. Click **Add New** → **Project** and import your repository.
+3. Vercel will detect Next.js automatically. Keep the default settings:
+   - **Framework Preset:** Next.js
+   - **Build Command:** `npm run build`
+   - **Install Command:** `npm install`
+4. (Optional) For the contact form to send email, add an environment variable in **Settings → Environment Variables**:
+   - Name: `RESEND_API_KEY`  
+   - Value: your Resend API key (see [CONTACT_SETUP.md](./CONTACT_SETUP.md)).
+5. Click **Deploy**. The project uses Node ≥18.17.0 (see `package.json` `engines` and `.nvmrc`).
+
 

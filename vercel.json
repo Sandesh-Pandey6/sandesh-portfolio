@@ -1,10 +1,5 @@
 {
   "framework": "nextjs",
   "installCommand": "npm install",
-  "buildCommand": "npm run build",
-  "functions": {
-    "src/app/api/contact/route.ts": {
-      "maxDuration": 15
-    }
-  }
+  "buildCommand": "npm run build"
 }

@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
+// Allow up to 15s for Resend API (Vercel serverless default is 10s)
+export const maxDuration = 15;
+
 const TO_EMAIL = "sandesh.pandey00112@gmail.com";
 
 function escapeHtml(text: string): string {
