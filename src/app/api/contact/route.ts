@@ -1,10 +1,19 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { SITE_EMAIL } from "@/data/site";
+import { checkContactRateLimit, rateLimitMessage } from "@/lib/contactRateLimit";
+import { domainAcceptsMail } from "@/lib/contactDomainCheck";
+import {
+  getEmailDomain,
+  normalizeContactPayload,
+  validateContactFields,
+} from "@/lib/contactValidation";
 
-// Allow up to 15s for Resend API (Vercel serverless default is 10s)
 export const maxDuration = 15;
 
-const TO_EMAIL = "sandesh.pandey00112@gmail.com";
+const TO_EMAIL = process.env.CONTACT_TO_EMAIL?.trim() || SITE_EMAIL;
+const FROM_EMAIL =
+  process.env.RESEND_FROM?.trim() || "Portfolio Contact <onboarding@resend.dev>";
 
 function escapeHtml(text: string): string {
   return text
@@ -15,22 +24,41 @@ function escapeHtml(text: string): string {
     .replace(/'/g, "&#039;");
 }
 
+function clientIp(request: Request): string {
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) return forwarded.split(",")[0]?.trim() || "unknown";
+  return request.headers.get("x-real-ip") || "unknown";
+}
+
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { name, email, message } = body;
+    if (!checkContactRateLimit(clientIp(request))) {
+      return NextResponse.json({ error: rateLimitMessage() }, { status: 429 });
+    }
 
-    if (!name || !email || !message) {
+    const body = await request.json();
+    const payload = normalizeContactPayload(body);
+
+    const fieldError = validateContactFields(payload);
+    if (fieldError) {
+      return NextResponse.json({ error: fieldError }, { status: 400 });
+    }
+
+    const domain = getEmailDomain(payload.email);
+    if (!domain) {
       return NextResponse.json(
-        { error: "Name, email, and message are required" },
+        { error: "Enter a valid email address." },
         { status: 400 }
       );
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(String(email))) {
+    const mailDomainOk = await domainAcceptsMail(domain);
+    if (!mailDomainOk) {
       return NextResponse.json(
-        { error: "Invalid email address" },
+        {
+          error:
+            "That email domain does not look valid. Please use a real address you can receive mail at.",
+        },
         { status: 400 }
       );
     }
@@ -50,18 +78,32 @@ export async function POST(request: Request) {
     }
 
     const resend = new Resend(apiKey);
-    const safeName = escapeHtml(String(name));
-    const safeEmail = escapeHtml(String(email));
-    const safeMessage = escapeHtml(String(message)).replace(/\n/g, "<br>");
+    const { name, email, message } = payload;
+    const safeName = escapeHtml(name);
+    const safeEmail = escapeHtml(email);
+    const safeMessage = escapeHtml(message).replace(/\n/g, "<br>");
+
+    const subject = `Portfolio: message from ${name}`;
+    const textBody = [
+      "New message from your portfolio",
+      "",
+      `Name: ${name}`,
+      `Email: ${email}`,
+      "",
+      "Message:",
+      message,
+    ].join("\n");
 
     const { error } = await resend.emails.send({
-      from: "Portfolio Contact <onboarding@resend.dev>",
-      to: TO_EMAIL,
+      from: FROM_EMAIL,
+      to: [TO_EMAIL],
       replyTo: email,
-      subject: `Contact from ${name} - Portfolio`,
+      subject,
+      text: textBody,
       html: `
         <h2>New message from your portfolio</h2>
-        <p><strong>From:</strong> ${safeName} (${safeEmail})</p>
+        <p><strong>Name:</strong> ${safeName}</p>
+        <p><strong>Email:</strong> <a href="mailto:${safeEmail}">${safeEmail}</a></p>
         <p><strong>Message:</strong></p>
         <p>${safeMessage}</p>
       `,
@@ -69,10 +111,11 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error("[Contact API] Resend error:", error);
-      return NextResponse.json(
-        { error: "Failed to send message. Please try again later." },
-        { status: 500 }
-      );
+      const hint =
+        process.env.NODE_ENV === "development"
+          ? error.message
+          : "Failed to send message. Please try again later.";
+      return NextResponse.json({ error: hint }, { status: 500 });
     }
 
     return NextResponse.json(

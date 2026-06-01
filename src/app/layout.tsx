@@ -1,38 +1,40 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider } from "@/components/ThemeProvider";
+import { Inter, Instrument_Serif } from "next/font/google";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import CustomCursor from "@/components/CustomCursor";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const instrumentSerif = Instrument_Serif({
+  weight: "400",
   subsets: ["latin"],
+  variable: "--font-serif",
 });
 
 export const metadata: Metadata = {
-  title: "Sandesh Pandey | Frontend & Full-Stack Web Developer",
+  title: "Sandesh Pandey | Full-Stack Web Developer",
   description:
-    "Personal portfolio of Sandesh Pandey - Frontend and Full-Stack Web Developer. Building modern web applications with React, Next.js, and Tailwind CSS.",
+    "Personal portfolio of Sandesh Pandey — Full-Stack Developer crafting robust, scalable web applications with React, Next.js, and Python.",
   keywords: [
     "Sandesh Pandey",
-    "Web Developer",
-    "Frontend Developer",
     "Full-Stack Developer",
+    "Web Developer",
     "React",
     "Next.js",
-    "Tailwind CSS",
+    "Python",
+    "FastAPI",
     "Portfolio",
   ],
   authors: [{ name: "Sandesh Pandey" }],
   openGraph: {
-    title: "Sandesh Pandey | Web Developer Portfolio",
+    title: "Sandesh Pandey | Full-Stack Developer",
     description:
-      "Frontend and Full-Stack Web Developer building modern applications with React, Next.js, and Tailwind CSS.",
+      "Full-Stack Developer crafting robust, scalable web applications.",
     type: "website",
   },
 };
@@ -43,33 +45,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var theme = localStorage.getItem('theme');
-                  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  if (theme === 'dark' || (!theme && prefersDark)) {
-                    document.documentElement.classList.add('dark');
-                  } else {
-                    document.documentElement.classList.remove('dark');
-                  }
-                } catch (e) {}
-              })();
-            `,
-          }}
-        />
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased`}
-      >
-        <ThemeProvider>
-          <Header />
-          <main>{children}</main>
-        </ThemeProvider>
+    <html lang="en">
+      <body className={`${inter.variable} ${instrumentSerif.variable}`}>
+        <CustomCursor />
+        <Header />
+        <main>{children}</main>
+        <Footer />
       </body>
     </html>
   );

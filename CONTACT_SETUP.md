@@ -2,10 +2,12 @@
 
 The contact form sends emails to **sandesh.pandey00112@gmail.com** using [Resend](https://resend.com).
 
+**Important:** Sign up for Resend with **sandesh.pandey00112@gmail.com**. On the free plan, `onboarding@resend.dev` can only deliver to the email you used for your Resend account.
+
 ## Step 1: Get a Resend API Key
 
-1. Go to [resend.com](https://resend.com) and sign up (free account).
-2. Verify your email address.
+1. Go to [resend.com](https://resend.com) and sign up (free account) with **sandesh.pandey00112@gmail.com**.
+2. Verify that Gmail inbox.
 3. In the dashboard, go to **API Keys** → **Create API Key**.
 4. Copy the key (it starts with `re_`).
 
@@ -40,8 +42,10 @@ RESEND_API_KEY=re_123abc456def789
 | Error | Solution |
 |-------|----------|
 | 503 "Email service not configured" | Add `RESEND_API_KEY` to `.env.local` and restart the dev server. |
-| 500 "Failed to send message" | Check the Resend dashboard for errors. Verify your account and domain. |
-| Still not working after adding key | Ensure you restarted the dev server. Env vars are loaded at startup. |
+| 500 "Failed to send message" | Open the [Resend dashboard](https://resend.com/emails) → **Emails** to see delivery logs. |
+| Email not in inbox | Check **Spam** and **Promotions**. Search for subject `Portfolio: message from`. |
+| Still not working after adding key | Restart `npm run dev`. Env vars load only at server start. |
+| Works locally, not on live site | Add `RESEND_API_KEY` in Vercel → Settings → Environment Variables, then redeploy. |
 
 ## Deploying to Vercel
 

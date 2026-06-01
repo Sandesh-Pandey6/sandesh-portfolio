@@ -1,30 +1,68 @@
+import Image from "next/image";
+import ScrollReveal from "./ScrollReveal";
+import profilePhoto from "@/Images/my.jpg";
+
 export default function About() {
   return (
-    <section
-      id="about"
-      className="scroll-mt-20 px-4 py-20"
-    >
-      <div className="mx-auto max-w-4xl">
-        <h2 className="mb-8 text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-          About Me
-        </h2>
-        <div className="space-y-4 text-base leading-relaxed text-zinc-600 dark:text-zinc-400 sm:text-lg">
-          <p>
-            I&apos;m Sandesh Pandey, a passionate web developer based in Nepal. I
-            love creating intuitive, performant, and visually appealing web
-            applications that solve real problems.
-          </p>
-          <p>
-            My journey in web development started with HTML, CSS, and JavaScript,
-            and I&apos;ve since expanded my skills to include modern frameworks like
-            React and Next.js. I enjoy working with Tailwind CSS for rapid,
-            utility-first styling and Git for version control.
-          </p>
-          <p>
-            I&apos;m constantly learning and exploring new technologies. My goal is
-            to grow as a frontend and full-stack developer, building scalable
-            applications that make a positive impact.
-          </p>
+    <section id="about" className="section-container">
+      <ScrollReveal delay={0}>
+        <p className="section-label">
+          <span>01</span> / About
+        </p>
+      </ScrollReveal>
+
+      <div className="about-grid">
+        <ScrollReveal delay={0.1}>
+          <div className="profile-intro">
+            <Image
+              src={profilePhoto}
+              alt="Sandesh Pandey"
+              width={profilePhoto.width}
+              height={profilePhoto.height}
+              className="profile-photo"
+              sizes="(max-width: 767px) min(100vw, 320px), 280px"
+              priority
+            />
+            <p className="profile-handle">
+              <span>sandesh_pandey</span>
+            </p>
+          </div>
+        </ScrollReveal>
+
+        <div>
+          <ScrollReveal delay={0.15}>
+            <h2 className="about-heading">
+              I bridge powerful backend logic with intuitive frontend
+              experiences.
+            </h2>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.2}>
+            <p className="about-text">
+              I&apos;m a passionate full-stack developer who treats software the
+              way a craftsman treats their tools — with respect, restraint, and a
+              relentless eye for detail. From REST APIs to pixel-tight React
+              interfaces, I enjoy owning the whole pipeline.
+            </p>
+            <p className="about-text">
+              My focus is on writing clean, testable, maintainable code —
+              software that holds its shape under pressure, scales without
+              ceremony, and is genuinely pleasant to work in months later.
+            </p>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.25}>
+            <div className="pillars">
+              <div className="pillar-card">
+                <h4>Clean Architecture</h4>
+                <p>Layered, modular, deliberate.</p>
+              </div>
+              <div className="pillar-card">
+                <h4>Vibe Designer Touch</h4>
+                <p>Micro-interactions that delight.</p>
+              </div>
+            </div>
+          </ScrollReveal>
         </div>
       </div>
     </section>

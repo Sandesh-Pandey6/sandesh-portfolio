@@ -1,57 +1,45 @@
-import Image from "next/image";
+import ScrollReveal from "./ScrollReveal";
 
-type Skill = { name: string; icon: string } | { name: string; image: string };
-
-const skills: Skill[] = [
-  { name: "HTML", icon: "🌐" },
-  { name: "CSS", image: "/css-logo.png" },
-  { name: "JavaScript", image: "/javascript-logo.png" },
-  { name: "React", image: "/react-logo.png" },
-  { name: "Next.js", icon: "▲" },
-  { name: "Tailwind CSS", image: "/tailwind-logo.png" },
-  { name: "Git & GitHub", image: "/github-logo.png" },
-  { name: "Basic Backend", icon: "🔧" },
+const categories = [
+  {
+    title: "Backend & Languages",
+    items: ["Python", "FastAPI", "Django", "Node.js", "PostgreSQL", "Redis"],
+  },
+  {
+    title: "Frontend",
+    items: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
+  },
+  {
+    title: "Testing & Tools",
+    items: ["Pytest", "Docker", "Git", "REST APIs"],
+  },
 ];
 
 export default function Skills() {
   return (
-    <section
-      id="skills"
-      className="scroll-mt-20 bg-zinc-100 px-4 py-20 dark:bg-zinc-900/50"
-    >
-      <div className="mx-auto max-w-6xl">
-        <h2 className="mb-12 text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-          Skills
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {skills.map((skill, index) => (
-            <div
-              key={skill.name}
-              className="group rounded-xl border border-zinc-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-emerald-200 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-emerald-800"
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              {"image" in skill && skill.image ? (
-                <span className="mb-3 block size-12">
-                  <Image
-                    src={skill.image}
-                    alt=""
-                    width={48}
-                    height={48}
-                    className="size-full object-contain"
-                    aria-hidden
-                  />
-                </span>
-              ) : "icon" in skill ? (
-                <span className="mb-3 block text-3xl" aria-hidden>
-                  {skill.icon}
-                </span>
-              ) : null}
-              <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
-                {skill.name}
-              </h3>
+    <section id="stack" className="section-container">
+      <ScrollReveal delay={0}>
+        <p className="section-label">
+          <span>02</span> / Stack
+        </p>
+        <h2 className="section-title">Tools chosen for longevity, not hype.</h2>
+      </ScrollReveal>
+
+      <div className="stack-categories">
+        {categories.map((cat, catIdx) => (
+          <ScrollReveal key={cat.title} delay={0.1 * catIdx}>
+            <div className="stack-category">
+              <h3>{cat.title}</h3>
+              <div className="stack-tags">
+                {cat.items.map((item) => (
+                  <span key={item} className="stack-tag">
+                    {item}
+                  </span>
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
+          </ScrollReveal>
+        ))}
       </div>
     </section>
   );

@@ -1,125 +1,160 @@
 "use client";
 
-import { useState } from "react";
+import { useState, FormEvent } from "react";
+import ScrollReveal from "./ScrollReveal";
+import { SITE_EMAIL_MAILTO, SOCIAL_GITHUB, SOCIAL_LINKEDIN } from "@/data/site";
+import {
+  normalizeContactPayload,
+  validateContactFields,
+} from "@/lib/contactValidation";
+
+const socialLinks = [
+  { name: "GitHub", href: SOCIAL_GITHUB },
+  { name: "LinkedIn", href: SOCIAL_LINKEDIN },
+];
 
 export default function Contact() {
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
+    "idle"
+  );
+  const [message, setMessage] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStatus("loading");
+    setMessage("");
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const payload = normalizeContactPayload({
+      name: formData.get("name"),
+      email: formData.get("email"),
+      message: formData.get("message"),
+      website: formData.get("website"),
+    });
+
+    const validationError = validateContactFields(payload);
+    if (validationError) {
+      setStatus("error");
+      setMessage(validationError);
+      return;
+    }
 
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
+      const data = await res.json();
 
-      if (res.ok) {
-        setStatus("success");
-        setFormData({ name: "", email: "", message: "" });
-      } else {
-        setStatus("error");
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to send message");
       }
-    } catch {
-      setStatus("error");
-    }
-  };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+      setStatus("success");
+      setMessage("Thanks! Your message was sent. I'll get back to you within a day.");
+      form.reset();
+    } catch (err) {
+      setStatus("error");
+      setMessage(
+        err instanceof Error ? err.message : "Something went wrong. Try again."
+      );
+    }
+  }
 
   return (
-    <section
-      id="contact"
-      className="scroll-mt-20 px-4 py-20"
-    >
-      <div className="mx-auto max-w-2xl">
-        <h2 className="mb-12 text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-          Get In Touch
-        </h2>
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-6 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900 sm:p-8"
-        >
-          <div>
-            <label
-              htmlFor="name"
-              className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-            >
-              Name
-            </label>
+    <section id="contact" className="contact-section">
+      <ScrollReveal delay={0}>
+        <p className="contact-eyebrow">Let&apos;s build something</p>
+        <h2>Have a project in mind? Let&apos;s talk.</h2>
+        <p className="contact-intro">
+          Whether it&apos;s a product MVP, an API integration, or a full rebuild
+          — drop a note and I&apos;ll get back within a day.
+        </p>
+      </ScrollReveal>
+
+      <ScrollReveal delay={0.1}>
+        <form className="contact-form" onSubmit={handleSubmit} noValidate>
+          <div className="contact-honeypot" aria-hidden="true">
+            <label htmlFor="website">Website</label>
             <input
+              id="website"
+              name="website"
               type="text"
+              tabIndex={-1}
+              autoComplete="off"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="name">Name</label>
+            <input
               id="name"
               name="name"
-              value={formData.name}
-              onChange={handleChange}
+              type="text"
               required
-              className="w-full rounded-lg border border-zinc-300 px-4 py-2 text-zinc-900 placeholder-zinc-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-400"
-              placeholder="Your name"
+              minLength={2}
+              maxLength={100}
+              autoComplete="name"
             />
           </div>
-          <div>
-            <label
-              htmlFor="email"
-              className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-            >
-              Email
-            </label>
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
             <input
-              type="email"
               id="email"
               name="email"
-              value={formData.email}
-              onChange={handleChange}
+              type="email"
               required
-              className="w-full rounded-lg border border-zinc-300 px-4 py-2 text-zinc-900 placeholder-zinc-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-400"
-              placeholder="your@email.com"
+              maxLength={254}
+              autoComplete="email"
+              placeholder="you@company.com"
             />
+            <span className="form-hint">Use a real inbox — temporary emails are blocked.</span>
           </div>
-          <div>
-            <label
-              htmlFor="message"
-              className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-            >
-              Message
-            </label>
+          <div className="form-group">
+            <label htmlFor="message">Message</label>
             <textarea
               id="message"
               name="message"
-              value={formData.message}
-              onChange={handleChange}
               required
-              rows={5}
-              className="w-full resize-none rounded-lg border border-zinc-300 px-4 py-2 text-zinc-900 placeholder-zinc-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-400"
-              placeholder="Your message..."
+              minLength={10}
+              maxLength={5000}
             />
           </div>
-          {status === "success" && (
-            <p className="rounded-lg bg-emerald-100 p-3 text-sm text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">
-              Thank you! Your message has been sent successfully.
-            </p>
-          )}
-          {status === "error" && (
-            <p className="rounded-lg bg-red-100 p-3 text-sm text-red-700 dark:bg-red-900/50 dark:text-red-400">
-              Something went wrong. Please try again later.
-            </p>
-          )}
           <button
             type="submit"
+            className="btn-primary"
             disabled={status === "loading"}
-            className="w-full rounded-lg bg-emerald-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {status === "loading" ? "Sending..." : "Send Message"}
+            {status === "loading" ? "Sending…" : "Send message"}
           </button>
+          {message && (
+            <p
+              className={`form-status ${status === "success" ? "success" : "error"}`}
+            >
+              {message}
+            </p>
+          )}
         </form>
-      </div>
+      </ScrollReveal>
+
+      <ScrollReveal delay={0.15}>
+        <div className="contact-socials">
+          {socialLinks.map((link) => (
+            <a
+              key={link.name}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {link.name}
+            </a>
+          ))}
+          <a href={SITE_EMAIL_MAILTO} className="contact-socials__email">
+            Email
+          </a>
+        </div>
+      </ScrollReveal>
     </section>
   );
 }
