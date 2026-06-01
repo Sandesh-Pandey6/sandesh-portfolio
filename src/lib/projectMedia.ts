@@ -10,7 +10,7 @@ export function resolveProjectVideo(url: string): VideoEmbed {
   if (!trimmed) return null;
 
   const youtubeMatch = trimmed.match(
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([\w-]{11})/
   );
   if (youtubeMatch) {
     return {

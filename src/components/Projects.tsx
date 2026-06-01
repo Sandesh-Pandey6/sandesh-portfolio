@@ -1,8 +1,11 @@
 import Link from "next/link";
 import ScrollReveal from "./ScrollReveal";
 import ProjectList from "./ProjectList";
+import { loadProjects } from "@/data/projects";
 
-export default function Projects() {
+export default async function Projects() {
+  const projects = await loadProjects();
+
   return (
     <section id="work" className="section-container">
       <ScrollReveal delay={0}>
@@ -15,7 +18,7 @@ export default function Projects() {
       </ScrollReveal>
 
       <ScrollReveal delay={0.1}>
-        <ProjectList />
+        <ProjectList projects={projects} />
       </ScrollReveal>
 
       <ScrollReveal delay={0.2}>

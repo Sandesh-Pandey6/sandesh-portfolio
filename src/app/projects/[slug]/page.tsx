@@ -1,31 +1,21 @@
-"use client";
-
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { projects } from "@/data/projects";
+import { notFound } from "next/navigation";
+import { getProjectBySlug } from "@/data/projects";
 import ProjectMedia from "@/components/ProjectMedia";
 import ScrollReveal from "@/components/ScrollReveal";
 
-export default function ProjectDetailPage() {
-  const params = useParams();
-  const slug = params.slug as string;
-  const project = projects.find((p) => p.slug === slug);
+export const dynamic = "force-dynamic";
+
+type PageProps = {
+  params: Promise<{ slug: string }>;
+};
+
+export default async function ProjectDetailPage({ params }: PageProps) {
+  const { slug } = await params;
+  const project = await getProjectBySlug(slug);
 
   if (!project) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "var(--text-muted)",
-          fontSize: "1.25rem",
-        }}
-      >
-        Project not found.
-      </div>
-    );
+    notFound();
   }
 
   return (
@@ -151,7 +141,14 @@ export default function ProjectDetailPage() {
         >
           Key Highlights
         </h3>
-        <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <ul
+          style={{
+            listStyle: "none",
+            display: "flex",
+            flexDirection: "column",
+            gap: "1rem",
+          }}
+        >
           {project.highlights.map((item, idx) => (
             <li
               key={idx}
@@ -192,6 +189,11 @@ export default function ProjectDetailPage() {
               className="link-demo"
             >
               Live demo
+            </a>
+          )}
+          {project.demoVideo && (
+            <a href="#demo" className="link-demo">
+              Watch demo
             </a>
           )}
           {project.github && (

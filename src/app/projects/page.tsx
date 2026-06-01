@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import ProjectList, { projects } from "@/components/ProjectList";
+import ProjectList from "@/components/ProjectList";
+import { loadProjects } from "@/data/projects";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "All Projects | Sandesh Pandey",
   description: "Full-stack projects — case studies, code, and live demos.",
 };
 
-export default function AllProjectsPage() {
+export default async function AllProjectsPage() {
+  const projects = await loadProjects();
+
   return (
     <main className="projects-page section-container">
       <p className="section-label">
@@ -20,7 +25,7 @@ export default function AllProjectsPage() {
         available.
       </p>
 
-      <ProjectList />
+      <ProjectList projects={projects} />
 
       <div className="projects-page__footer">
         <Link href="/#work" className="link-demo">
