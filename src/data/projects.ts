@@ -1,2 +1,6 @@
 export type { ProjectDetail, ProjectsFile } from "@/types/project";
-export { loadProjects, getProjectBySlug } from "@/lib/projectsStore";
+export {
+  loadProjects,
+  loadFeaturedProjects,
+  getProjectBySlug,
+} from "@/lib/projectsStore";

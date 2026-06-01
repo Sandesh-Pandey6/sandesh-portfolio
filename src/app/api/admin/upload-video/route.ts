@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
 import { getCloudinary, isCloudinaryConfigured } from "@/lib/cloudinary";
+import { formatCloudinaryError } from "@/lib/cloudinaryErrors";
+
+export const maxDuration = 120;
 
 const MAX_BYTES = 100 * 1024 * 1024; // 100 MB
 
@@ -34,8 +37,11 @@ export async function POST(request: Request) {
   }
 
   if (file.size > MAX_BYTES) {
+    const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
     return NextResponse.json(
-      { error: "Video is too large (max 100 MB for this upload)" },
+      {
+        error: `File is ${sizeMb} MB. Cloudinary free plan allows ${MAX_BYTES / (1024 * 1024)} MB per video (length does not matter — HD recordings are often larger). Compress to 720p or use a YouTube link in Demo video URL.`,
+      },
       { status: 400 }
     );
   }
@@ -79,7 +85,9 @@ export async function POST(request: Request) {
       publicId: result.public_id,
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Upload failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      { error: formatCloudinaryError(err) },
+      { status: 500 }
+    );
   }
 }

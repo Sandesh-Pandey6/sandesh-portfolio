@@ -1,4 +1,9 @@
 {
+  "featuredSlugs": [
+    "taskflow-api",
+    "shopnext",
+    "datapulse"
+  ],
   "githubRepoBySlug": {
     "taskflow-api": "Application_Development_Backend",
     "shopnext": "icecream_ecommerce",
@@ -28,7 +33,8 @@
         "Redis-backed caching layer reducing average response time by 40%",
         "Comprehensive test suite with 95%+ coverage using Pytest",
         "Docker Compose setup for local development and CI/CD pipeline"
-      ]
+      ],
+      "demoVideo": "https://res.cloudinary.com/dcvyjq1o2/video/upload/v1780329990/portfolio/gdgwsptgvxo3q0unlsw7.mp4"
     },
     {
       "id": "02",

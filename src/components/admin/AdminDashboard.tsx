@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import CloudinaryVideoUpload from "@/components/admin/CloudinaryVideoUpload";
 import type { ProjectDetail, ProjectsFile } from "@/types/project";
+import { FEATURED_HOME_MAX } from "@/types/project";
 
 function linesToList(value: string): string[] {
   return value
@@ -82,8 +83,6 @@ export default function AdminDashboard() {
   const [saveMessage, setSaveMessage] = useState("");
   const [saveError, setSaveError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [cloudinaryReady, setCloudinaryReady] = useState(false);
-
   const checkSession = useCallback(async () => {
     const res = await fetch("/api/admin/session");
     const json = (await res.json()) as {
@@ -106,14 +105,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     void (async () => {
       const ok = await checkSession();
-      if (ok) {
-        await loadProjects();
-        const res = await fetch("/api/admin/cloudinary-status");
-        if (res.ok) {
-          const json = (await res.json()) as { configured: boolean };
-          setCloudinaryReady(json.configured);
-        }
-      }
+      if (ok) await loadProjects();
     })();
   }, [checkSession, loadProjects]);
 
@@ -192,13 +184,40 @@ export default function AdminDashboard() {
     setSaveMessage("");
   }
 
+  const featuredSlugs = data?.featuredSlugs ?? [];
+
+  function toggleFeatured(slug: string) {
+    if (!data) return;
+    const current = data.featuredSlugs ?? [];
+    if (current.includes(slug)) {
+      setData({
+        ...data,
+        featuredSlugs: current.filter((s) => s !== slug),
+      });
+    } else {
+      if (current.length >= FEATURED_HOME_MAX) {
+        setSaveError(
+          `Home page can only showcase ${FEATURED_HOME_MAX} projects. Uncheck one first.`
+        );
+        return;
+      }
+      setData({ ...data, featuredSlugs: [...current, slug] });
+    }
+    setSaveMessage("");
+    setSaveError("");
+  }
+
   function deleteProject(index: number) {
     if (!data || data.projects.length <= 1) return;
     if (!window.confirm(`Delete “${data.projects[index].title}”? This cannot be undone until you save.`)) {
       return;
     }
+    const removed = data.projects[index];
     const projects = data.projects.filter((_, i) => i !== index);
-    setData({ ...data, projects });
+    const nextFeatured = (data.featuredSlugs ?? []).filter(
+      (s) => s !== removed?.slug
+    );
+    setData({ ...data, projects, featuredSlugs: nextFeatured });
     setActiveIndex(Math.max(0, index - 1));
     setSaveMessage("");
   }
@@ -349,8 +368,33 @@ export default function AdminDashboard() {
 
       <div className="admin-workspace">
         <aside className="admin-sidebar admin-card">
-          <p className="admin-sidebar__label">Your projects</p>
-          <p className="admin-sidebar__hint">{data.projects.length} total</p>
+          <p className="admin-sidebar__label">Home page showcase</p>
+          <p className="admin-sidebar__hint">
+            Pick up to {FEATURED_HOME_MAX} for the home Work section (
+            {featuredSlugs.length}/{FEATURED_HOME_MAX} selected)
+          </p>
+          <ul className="admin-featured-list">
+            {data.projects.map((p) => {
+              const onHome = featuredSlugs.includes(p.slug);
+              return (
+                <li key={`featured-${p.slug}`}>
+                  <label className="admin-featured-item">
+                    <input
+                      type="checkbox"
+                      checked={onHome}
+                      onChange={() => toggleFeatured(p.slug)}
+                    />
+                    <span>{p.title}</span>
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+
+          <p className="admin-sidebar__label admin-sidebar__label--spaced">
+            All projects
+          </p>
+          <p className="admin-sidebar__hint">{data.projects.length} total · /projects shows all</p>
           <ul className="admin-project-list">
             {data.projects.map((p, i) => (
               <li key={`${p.slug}-${i}`}>
@@ -366,6 +410,7 @@ export default function AdminDashboard() {
                   <span className="admin-project-list__title">{p.title}</span>
                   <span className="admin-project-list__meta">
                     {p.year} · /{p.slug}
+                    {featuredSlugs.includes(p.slug) ? " · on home" : ""}
                   </span>
                 </button>
               </li>
@@ -502,28 +547,17 @@ export default function AdminDashboard() {
             title="Links & demos"
             description="Optional. Leave blank if you don't have a live site or video yet."
           >
-            {cloudinaryReady ? (
-              <div className="admin-field admin-field--wide">
-                <CloudinaryVideoUpload
-                  projectSlug={project.slug}
-                  onUploaded={(url) => {
-                    updateProject(activeIndex, { demoVideo: url });
-                    setSaveMessage(
-                      "Video uploaded to Cloudinary. Click Save changes to publish on your site."
-                    );
-                  }}
-                />
-              </div>
-            ) : (
-              <div className="admin-field admin-field--wide admin-cloudinary-setup">
-                <p className="admin-cloudinary__title">Cloudinary (recommended)</p>
-                <p className="admin-cloudinary__desc">
-                  Add your Cloudinary keys to <code>.env.local</code>, restart{" "}
-                  <code>npm run dev</code>, then upload videos here — or paste a
-                  Cloudinary URL manually below.
-                </p>
-              </div>
-            )}
+            <div className="admin-field admin-field--wide">
+              <CloudinaryVideoUpload
+                projectSlug={project.slug}
+                onUploaded={(url) => {
+                  updateProject(activeIndex, { demoVideo: url });
+                  setSaveMessage(
+                    "Video uploaded to Cloudinary. Click Save changes to publish on your site."
+                  );
+                }}
+              />
+            </div>
             <Field
               label="Live demo URL"
               hint="Opens the deployed app — shows a “Live Demo” button"

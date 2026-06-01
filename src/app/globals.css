@@ -2118,6 +2118,44 @@ html:has(.admin-shell).custom-cursor-active * {
   margin-bottom: 0.5rem;
 }
 
+.admin-sidebar__label--spaced {
+  margin-top: 1.25rem;
+}
+
+.admin-featured-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.admin-featured-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.admin-featured-item input {
+  accent-color: var(--accent);
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.admin-featured-item:has(input:checked) {
+  color: var(--text-main);
+}
+
+.admin-featured-item:has(input:checked) span {
+  color: var(--accent);
+}
+
 .admin-project-list {
   list-style: none;
   display: flex;
@@ -2394,4 +2432,51 @@ html:has(.admin-shell).custom-cursor-active * {
   margin-top: 0.5rem;
   font-size: 0.75rem;
   color: var(--text-muted);
+}
+
+.admin-cloudinary__limit {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.admin-cloudinary__limit strong {
+  color: var(--accent);
+}
+
+.admin-cloudinary__tip {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.admin-cloudinary__tip code {
+  font-size: 0.85em;
+  color: var(--accent);
+}
+
+.admin-upload-progress {
+  margin-top: 0.85rem;
+}
+
+.admin-upload-progress__track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border-color);
+  overflow: hidden;
+}
+
+.admin-upload-progress__bar {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 0.25s ease;
+}
+
+.admin-upload-progress__text {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--accent);
 }

@@ -16,4 +16,8 @@ export interface ProjectDetail {
 export type ProjectsFile = {
   projects: ProjectDetail[];
   githubRepoBySlug: Record<string, string>;
+  /** Up to 3 slugs shown on the home page Work section (order preserved) */
+  featuredSlugs?: string[];
 };
+
+export const FEATURED_HOME_MAX = 3;

@@ -1,10 +1,10 @@
 import Link from "next/link";
 import ScrollReveal from "./ScrollReveal";
 import ProjectList from "./ProjectList";
-import { loadProjects } from "@/data/projects";
+import { loadFeaturedProjects } from "@/data/projects";
 
 export default async function Projects() {
-  const projects = await loadProjects();
+  const projects = await loadFeaturedProjects();
 
   return (
     <section id="work" className="section-container">

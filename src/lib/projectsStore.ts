@@ -2,6 +2,7 @@ import { readFile, writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { head, put } from "@vercel/blob";
 import type { ProjectDetail, ProjectsFile } from "@/types/project";
+import { FEATURED_HOME_MAX } from "@/types/project";
 import { SOCIAL_GITHUB } from "@/data/site";
 
 const DATA_PATH = path.join(process.cwd(), "data", "projects.json");
@@ -101,9 +102,28 @@ export async function writeProjectsFile(data: ProjectsFile): Promise<void> {
   await writeToDisk(data);
 }
 
+export function resolveFeaturedSlugs(file: ProjectsFile): string[] {
+  const valid = new Set(file.projects.map((p) => p.slug));
+  if (file.featuredSlugs?.length) {
+    return file.featuredSlugs
+      .filter((slug) => valid.has(slug))
+      .slice(0, FEATURED_HOME_MAX);
+  }
+  return file.projects.slice(0, FEATURED_HOME_MAX).map((p) => p.slug);
+}
+
 export async function loadProjects(): Promise<ProjectDetail[]> {
   const file = await readProjectsFile();
   return applyDemoLinks(file);
+}
+
+export async function loadFeaturedProjects(): Promise<ProjectDetail[]> {
+  const file = await readProjectsFile();
+  const all = applyDemoLinks(file);
+  const slugs = resolveFeaturedSlugs(file);
+  return slugs
+    .map((slug) => all.find((p) => p.slug === slug))
+    .filter((p): p is ProjectDetail => Boolean(p));
 }
 
 export async function getProjectBySlug(
@@ -121,6 +141,14 @@ export function validateProjectsFile(data: ProjectsFile): string | null {
     if (slugs.has(p.slug)) return `Duplicate slug: ${p.slug}`;
     slugs.add(p.slug);
     if (!p.title?.trim()) return `Project "${p.slug}" needs a title`;
+  }
+  if (data.featuredSlugs) {
+    if (data.featuredSlugs.length > FEATURED_HOME_MAX) {
+      return `Home page can showcase at most ${FEATURED_HOME_MAX} projects`;
+    }
+    for (const slug of data.featuredSlugs) {
+      if (!slugs.has(slug)) return `Featured slug not found: ${slug}`;
+    }
   }
   return null;
 }
