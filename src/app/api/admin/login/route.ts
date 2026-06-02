@@ -8,13 +8,10 @@ import {
 
 export async function POST(request: Request) {
   if (!isAdminConfigured()) {
-    return NextResponse.json(
-      {
-        error:
-          "Admin is not configured. Set ADMIN_PASSWORD in .env.local and restart the dev server.",
-      },
-      { status: 503 }
-    );
+    const hint = process.env.VERCEL
+      ? "Add ADMIN_PASSWORD in Vercel → Project Settings → Environment Variables, then redeploy."
+      : "Set ADMIN_PASSWORD in .env.local and restart the dev server.";
+    return NextResponse.json({ error: `Admin is not configured. ${hint}` }, { status: 503 });
   }
 
   const body = (await request.json()) as { password?: string };

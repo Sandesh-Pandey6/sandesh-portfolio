@@ -2000,6 +2000,16 @@ html:has(.admin-shell).custom-cursor-active * {
   line-height: 1.8;
 }
 
+.admin-setup-lead {
+  margin-top: 0.75rem;
+}
+
+.admin-setup-note {
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
 .admin-toolbar {
   display: flex;
   flex-wrap: wrap;

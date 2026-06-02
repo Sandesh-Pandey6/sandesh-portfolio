@@ -68,6 +68,7 @@ function Field({
 export default function AdminDashboard() {
   const [authenticated, setAuthenticated] = useState(false);
   const [configured, setConfigured] = useState(true);
+  const [deployedOnVercel, setDeployedOnVercel] = useState(false);
   const [loading, setLoading] = useState(true);
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -83,9 +84,11 @@ export default function AdminDashboard() {
     const json = (await res.json()) as {
       configured: boolean;
       authenticated: boolean;
+      deployedOnVercel?: boolean;
     };
     setConfigured(json.configured);
     setAuthenticated(json.authenticated);
+    setDeployedOnVercel(Boolean(json.deployedOnVercel));
     setLoading(false);
     return json.authenticated;
   }, []);
@@ -231,18 +234,56 @@ export default function AdminDashboard() {
         <div className="admin-card admin-card--narrow">
           <span className="admin-eyebrow">Setup required</span>
           <h1 className="admin-title">Admin is not ready yet</h1>
-          <ol className="admin-steps-list">
-            <li>
-              Open <code>.env.local</code> in your project folder
-            </li>
-            <li>
-              Add <code>ADMIN_PASSWORD=your-secret</code>
-            </li>
-            <li>
-              Restart the dev server (<code>npm run dev</code>)
-            </li>
-            <li>Reload this page</li>
-          </ol>
+          {deployedOnVercel ? (
+            <>
+              <p className="admin-lead admin-setup-lead">
+                This live site is missing <code>ADMIN_PASSWORD</code>. Vercel does
+                not use your local <code>.env.local</code> file — add it in the
+                Vercel dashboard.
+              </p>
+              <ol className="admin-steps-list">
+                <li>
+                  Open{" "}
+                  <a
+                    href="https://vercel.com/dashboard"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="admin-inline-link"
+                  >
+                    vercel.com/dashboard
+                  </a>{" "}
+                  → your project → <strong>Settings</strong> →{" "}
+                  <strong>Environment Variables</strong>
+                </li>
+                <li>
+                  Add <code>ADMIN_PASSWORD</code> with a strong password (enable
+                  Production)
+                </li>
+                <li>
+                  Redeploy: <strong>Deployments</strong> → latest →{" "}
+                  <strong>Redeploy</strong>
+                </li>
+                <li>Reload this page and sign in</li>
+              </ol>
+              <p className="admin-muted admin-setup-note">
+                To save project / stack / hero edits on the live site, also add{" "}
+                <code>BLOB_READ_WRITE_TOKEN</code> from Vercel Storage → Blob.
+              </p>
+            </>
+          ) : (
+            <ol className="admin-steps-list">
+              <li>
+                Open <code>.env.local</code> in your project folder
+              </li>
+              <li>
+                Add <code>ADMIN_PASSWORD=your-secret</code>
+              </li>
+              <li>
+                Restart the dev server (<code>npm run dev</code>)
+              </li>
+              <li>Reload this page</li>
+            </ol>
+          )}
         </div>
       </div>
     );

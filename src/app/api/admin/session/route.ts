@@ -5,5 +5,6 @@ export async function GET() {
   return NextResponse.json({
     configured: isAdminConfigured(),
     authenticated: await isAdminAuthenticated(),
+    deployedOnVercel: Boolean(process.env.VERCEL),
   });
 }
