@@ -430,36 +430,6 @@ html.custom-cursor-active * {
   }
 }
 
-.hero-badge-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 2rem;
-}
-
-.badge-available {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 999px;
-  border: 1px solid rgba(74, 222, 128, 0.35);
-  background: rgba(74, 222, 128, 0.08);
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--available);
-}
-
-.badge-available::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--available);
-  box-shadow: 0 0 8px var(--available);
-}
-
 .hero h1,
 .hero-title {
   font-family: var(--font-serif), Georgia, serif;
@@ -913,6 +883,83 @@ html.custom-cursor-active * {
   border-top: 1px solid var(--border-color);
 }
 
+.projects-pagination {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.projects-pagination__summary {
+  margin: 0 0 1.25rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.projects-pagination__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem 1rem;
+}
+
+.projects-pagination__nav {
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+}
+
+.projects-pagination__nav--disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.projects-pagination__pages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.projects-pagination__page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  transition:
+    color 0.2s,
+    border-color 0.2s,
+    background 0.2s;
+}
+
+.projects-pagination__page:hover {
+  color: var(--text-main);
+  border-color: var(--text-muted);
+}
+
+.projects-pagination__page--active {
+  color: var(--bg-main);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.projects-pagination__page--active:hover {
+  color: var(--bg-main);
+  border-color: var(--accent);
+}
+
 /* Project demo video / embed */
 .project-media {
   margin-bottom: 3rem;
@@ -1015,6 +1062,34 @@ html.custom-cursor-active * {
   margin-top: 0.35rem;
   font-size: 0.75rem;
   color: var(--text-muted);
+}
+
+.contact-email-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.contact-email-row input {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.contact-verify-btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
+}
+
+.contact-code-input {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.2em;
+  max-width: 12rem;
+}
+
+.contact-code-status {
+  margin-top: 0.5rem;
 }
 
 .form-group label {
@@ -1791,10 +1866,6 @@ html.custom-cursor-active * {
 @media (max-width: 767px) {
   .hero {
     padding: 6.5rem var(--page-px) 2.5rem;
-  }
-
-  .hero-badge-row {
-    margin-bottom: 1.5rem;
   }
 
   .hero-desc {

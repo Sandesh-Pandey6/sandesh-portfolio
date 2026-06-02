@@ -2,12 +2,14 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { SITE_EMAIL } from "@/data/site";
 import { checkContactRateLimit, rateLimitMessage } from "@/lib/contactRateLimit";
-import { domainAcceptsMail } from "@/lib/contactDomainCheck";
 import {
-  getEmailDomain,
   normalizeContactPayload,
   validateContactFields,
 } from "@/lib/contactValidation";
+import {
+  isVerificationConfigured,
+  verifyVerificationToken,
+} from "@/lib/contactVerification";
 
 export const maxDuration = 15;
 
@@ -44,20 +46,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: fieldError }, { status: 400 });
     }
 
-    const domain = getEmailDomain(payload.email);
-    if (!domain) {
-      return NextResponse.json(
-        { error: "Enter a valid email address." },
-        { status: 400 }
-      );
-    }
-
-    const mailDomainOk = await domainAcceptsMail(domain);
-    if (!mailDomainOk) {
+    if (!isVerificationConfigured()) {
       return NextResponse.json(
         {
           error:
-            "That email domain does not look valid. Please use a real address you can receive mail at.",
+            "Email verification is not configured. Set ADMIN_PASSWORD or CONTACT_VERIFY_SECRET.",
+        },
+        { status: 503 }
+      );
+    }
+
+    if (
+      !payload.verificationToken ||
+      !payload.verificationCode ||
+      !verifyVerificationToken(
+        payload.verificationToken,
+        payload.email,
+        payload.verificationCode
+      )
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Invalid or expired verification code. Click “Send code” and enter the 6-digit code from your inbox.",
         },
         { status: 400 }
       );

@@ -1,12 +1,26 @@
 /** Simple in-memory rate limit (per server instance). */
 
 const WINDOW_MS = 60 * 60 * 1000; // 1 hour
-const MAX_REQUESTS = 5;
+
+const limits = {
+  contact: 5,
+  "send-code": 4,
+} as const;
+
+type RateLimitAction = keyof typeof limits;
 
 const hits = new Map<string, { count: number; resetAt: number }>();
 
-export function checkContactRateLimit(ip: string): boolean {
-  const key = ip || "unknown";
+function rateLimitKey(ip: string, action: RateLimitAction): string {
+  return `${action}:${ip || "unknown"}`;
+}
+
+export function checkContactRateLimit(
+  ip: string,
+  action: RateLimitAction = "contact"
+): boolean {
+  const key = rateLimitKey(ip, action);
+  const max = limits[action];
   const now = Date.now();
   const entry = hits.get(key);
 
@@ -15,7 +29,7 @@ export function checkContactRateLimit(ip: string): boolean {
     return true;
   }
 
-  if (entry.count >= MAX_REQUESTS) {
+  if (entry.count >= max) {
     return false;
   }
 
@@ -23,6 +37,9 @@ export function checkContactRateLimit(ip: string): boolean {
   return true;
 }
 
-export function rateLimitMessage(): string {
+export function rateLimitMessage(action: RateLimitAction = "contact"): string {
+  if (action === "send-code") {
+    return "Too many verification codes requested. Please try again in an hour.";
+  }
   return "Too many messages sent. Please try again in an hour.";
 }

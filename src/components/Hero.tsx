@@ -51,10 +51,6 @@ export default function Hero({ stats = defaultStats }: { stats?: HeroStat[] }) {
         <div className="hero-inner">
           <div className="hero-layout">
             <div className="hero-stack">
-              <div className="hero-badge-row">
-                <span className="badge-available">Available</span>
-              </div>
-
               <h1 className="hero-title">
                 <span className="hero-title__line">
                   Hi, I&apos;m a{" "}

@@ -29,6 +29,22 @@ RESEND_API_KEY=re_123abc456def789
 
 > `.env.local` is in `.gitignore` and will not be committed. Keep your API key private.
 
+## Email verification (Gmail / Outlook)
+
+Visitors must prove they own the inbox:
+
+1. Enter a **Gmail or Outlook** address and click **Send code**.
+2. They receive a **6-digit code** at that address (expires in 10 minutes).
+3. Enter the code, then **Send message**.
+
+This is the reliable way to confirm the mailbox exists — Google and Microsoft do not allow third-party “does this Gmail exist?” checks.
+
+**Resend requirement:** With the default `onboarding@resend.dev` sender, Resend may only deliver to your own inbox. To send verification codes to visitors, [verify a domain](https://resend.com/docs/dashboard/domains/introduction) in Resend and set in `.env.local`:
+
+```
+RESEND_FROM=Portfolio <hello@yourdomain.com>
+```
+
 ## Step 3: Restart the Dev Server
 
 **Important:** Next.js only loads environment variables when the server starts.

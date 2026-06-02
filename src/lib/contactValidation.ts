@@ -1,5 +1,23 @@
 /** Shared contact form validation (client + server). */
 
+/** Exact domains allowed on the contact form */
+export const ALLOWED_CONTACT_DOMAINS = new Set([
+  "gmail.com",
+  "googlemail.com",
+  "outlook.com",
+  "hotmail.com",
+  "live.com",
+  "msn.com",
+]);
+
+const MICROSOFT_MAIL_ROOTS = new Set(["outlook", "hotmail", "live"]);
+
+function isMicrosoftConsumerDomain(domain: string): boolean {
+  const labels = domain.split(".");
+  if (labels.length < 2 || labels.length > 3) return false;
+  return MICROSOFT_MAIL_ROOTS.has(labels[0]);
+}
+
 const EMAIL_REGEX =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 
@@ -37,7 +55,17 @@ const DISPOSABLE_DOMAINS = new Set([
   "yopmail.net",
 ]);
 
-const FAKE_LOCAL = /^(test|testing|fake|spam|temp|tmp|noreply|no-reply|admin|user|asdf|qwerty|abc|123|none|null|foo|bar)$/i;
+/** Local parts that are almost never real inboxes */
+const FAKE_LOCAL =
+  /^(test|testing|fake|spam|temp|tmp|noreply|no-reply|admin|user|you|your|yours|me|hello|hi|email|mail|contact|name|sample|demo|example|asdf|qwerty|abc|123|none|null|foo|bar)$/i;
+
+/** Example addresses from the form — not real mailboxes */
+const PLACEHOLDER_EMAILS = new Set([
+  "you@gmail.com",
+  "you@outlook.com",
+  "your.name@gmail.com",
+  "your.name@outlook.com",
+]);
 
 const FAKE_DOMAIN =
   /^(example\.(com|org|net)|test\.(com|de)|localhost|invalid|fake|temp|throwaway)$/i;
@@ -47,6 +75,8 @@ export type ContactPayload = {
   email: string;
   message: string;
   website?: string;
+  verificationToken?: string;
+  verificationCode?: string;
 };
 
 export function normalizeContactPayload(body: Record<string, unknown>): ContactPayload {
@@ -55,6 +85,8 @@ export function normalizeContactPayload(body: Record<string, unknown>): ContactP
     email: String(body.email ?? "").trim().toLowerCase(),
     message: String(body.message ?? "").trim(),
     website: String(body.website ?? "").trim(),
+    verificationToken: String(body.verificationToken ?? "").trim(),
+    verificationCode: String(body.verificationCode ?? "").trim(),
   };
 }
 
@@ -62,6 +94,13 @@ export function getEmailDomain(email: string): string | null {
   const at = email.lastIndexOf("@");
   if (at < 1) return null;
   return email.slice(at + 1).toLowerCase();
+}
+
+export function isAllowedContactEmail(email: string): boolean {
+  const domain = getEmailDomain(email);
+  if (!domain) return false;
+  if (ALLOWED_CONTACT_DOMAINS.has(domain)) return true;
+  return isMicrosoftConsumerDomain(domain);
 }
 
 export function isDisposableDomain(domain: string): boolean {
@@ -92,6 +131,10 @@ export function validateEmailFormat(email: string): string | null {
     return "Enter a valid email address.";
   }
 
+  if (PLACEHOLDER_EMAILS.has(email)) {
+    return "Enter your real Gmail or Outlook address — not the example text from the form.";
+  }
+
   if (FAKE_LOCAL.test(local)) {
     return "Please use your real email address.";
   }
@@ -102,6 +145,10 @@ export function validateEmailFormat(email: string): string | null {
 
   if (isDisposableDomain(domain)) {
     return "Temporary email addresses are not allowed. Use your real inbox.";
+  }
+
+  if (!isAllowedContactEmail(email)) {
+    return "Please use a Gmail or Outlook address (e.g. alex.smith@gmail.com).";
   }
 
   return null;
