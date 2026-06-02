@@ -3,6 +3,7 @@ import Link from "next/link";
 import githubIcon from "@/Images/Gemini_Generated_Image_nd6qoand6qoand6q.png";
 import linkedinIcon from "@/Images/12.png";
 import { SOCIAL_GITHUB, SOCIAL_LINKEDIN } from "@/data/site";
+import type { HeroStat } from "@/types/heroStats";
 
 const heroSocials = [
   { label: "GitHub", href: SOCIAL_GITHUB, icon: githubIcon },
@@ -37,7 +38,13 @@ function MarqueeContent() {
   );
 }
 
-export default function Hero() {
+const defaultStats: HeroStat[] = [
+  { value: "1+", label: "Years building" },
+  { value: "5+", label: "Shipped projects" },
+  { value: "10+", label: "Stacks fluent" },
+];
+
+export default function Hero({ stats = defaultStats }: { stats?: HeroStat[] }) {
   return (
     <>
       <section id="hero" className="hero">
@@ -75,18 +82,12 @@ export default function Hero() {
               </div>
 
               <div className="hero-stats">
-                <div>
-                <div className="stat-value">1+</div>
-                <div className="stat-label">Years building</div>
-              </div>
-              <div>
-                <div className="stat-value">5+</div>
-                  <div className="stat-label">Shipped projects</div>
-                </div>
-                <div>
-                  <div className="stat-value">10+</div>
-                  <div className="stat-label">Stacks fluent</div>
-                </div>
+                {stats.map((stat, i) => (
+                  <div key={`${stat.label}-${i}`}>
+                    <div className="stat-value">{stat.value}</div>
+                    <div className="stat-label">{stat.label}</div>
+                  </div>
+                ))}
               </div>
             </div>
 

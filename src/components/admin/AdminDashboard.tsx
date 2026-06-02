@@ -2,20 +2,13 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import AdminHeroEditor from "@/components/admin/AdminHeroEditor";
+import AdminLinesTextarea from "@/components/admin/AdminLinesTextarea";
+import AdminStackEditor from "@/components/admin/AdminStackEditor";
+import AdminTabsBar, { type AdminPage } from "@/components/admin/AdminTabsBar";
 import CloudinaryVideoUpload from "@/components/admin/CloudinaryVideoUpload";
 import type { ProjectDetail, ProjectsFile } from "@/types/project";
 import { FEATURED_HOME_MAX } from "@/types/project";
-
-function linesToList(value: string): string[] {
-  return value
-    .split("\n")
-    .map((s) => s.trim())
-    .filter(Boolean);
-}
-
-function listToLines(items: string[]): string {
-  return items.join("\n");
-}
 
 function emptyProject(index: number): ProjectDetail {
   const n = String(index + 1).padStart(2, "0");
@@ -83,6 +76,8 @@ export default function AdminDashboard() {
   const [saveMessage, setSaveMessage] = useState("");
   const [saveError, setSaveError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [adminPage, setAdminPage] = useState<AdminPage>("projects");
+
   const checkSession = useCallback(async () => {
     const res = await fetch("/api/admin/session");
     const json = (await res.json()) as {
@@ -284,6 +279,32 @@ export default function AdminDashboard() {
     );
   }
 
+  if (adminPage === "stack") {
+    return (
+      <div className="admin-app">
+        <AdminTabsBar
+          active="stack"
+          onChange={setAdminPage}
+          onLogout={() => void handleLogout()}
+        />
+        <AdminStackEditor />
+      </div>
+    );
+  }
+
+  if (adminPage === "hero") {
+    return (
+      <div className="admin-app">
+        <AdminTabsBar
+          active="hero"
+          onChange={setAdminPage}
+          onLogout={() => void handleLogout()}
+        />
+        <AdminHeroEditor />
+      </div>
+    );
+  }
+
   if (!data) {
     return (
       <div className="admin-center">
@@ -310,6 +331,25 @@ export default function AdminDashboard() {
 
   return (
     <div className="admin-app">
+      <AdminTabsBar
+        active="projects"
+        onChange={setAdminPage}
+        onLogout={() => void handleLogout()}
+      />
+
+      <p className="admin-alert admin-alert--info admin-page-hint">
+        Editing <strong>projects</strong>? Use the form below. For home page sections,
+        open{" "}
+        <button type="button" className="admin-inline-link" onClick={() => setAdminPage("hero")}>
+          Hero stats
+        </button>{" "}
+        or{" "}
+        <button type="button" className="admin-inline-link" onClick={() => setAdminPage("stack")}>
+          Tech stack
+        </button>
+        .
+      </p>
+
       <header className="admin-toolbar">
         <div className="admin-toolbar__intro">
           <h1 className="admin-title">Project editor</h1>
@@ -318,13 +358,6 @@ export default function AdminDashboard() {
           </p>
         </div>
         <div className="admin-toolbar__actions">
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={() => void handleLogout()}
-          >
-            Sign out
-          </button>
           <button
             type="button"
             className="btn-primary"
@@ -522,23 +555,21 @@ export default function AdminDashboard() {
               />
             </Field>
             <Field label="Tech stack" hint="One technology per line — shown as tags" span={2}>
-              <textarea
+              <AdminLinesTextarea
+                syncKey={`${project.slug}-tech`}
+                items={project.techStack}
                 rows={4}
-                value={listToLines(project.techStack)}
-                onChange={(e) =>
-                  updateProject(activeIndex, { techStack: linesToList(e.target.value) })
-                }
                 placeholder={"FastAPI\nPostgreSQL\nDocker"}
+                onItemsChange={(techStack) => updateProject(activeIndex, { techStack })}
               />
             </Field>
             <Field label="Highlights" hint="One bullet per line — key achievements" span={2}>
-              <textarea
+              <AdminLinesTextarea
+                syncKey={`${project.slug}-highlights`}
+                items={project.highlights}
                 rows={6}
-                value={listToLines(project.highlights)}
-                onChange={(e) =>
-                  updateProject(activeIndex, { highlights: linesToList(e.target.value) })
-                }
                 placeholder={"Built JWT auth with role-based access\n95%+ test coverage"}
+                onItemsChange={(highlights) => updateProject(activeIndex, { highlights })}
               />
             </Field>
           </AdminSection>

@@ -1,0 +1,39 @@
+{
+  "enabled": true,
+  "sectionLabel": "02 / Stack",
+  "sectionTitle": "Tools chosen for longevity, not hype.",
+  "categories": [
+    {
+      "id": "backend",
+      "title": "Backend & Languages",
+      "items": [
+        "Python",
+        "FastAPI",
+        "Django",
+        "Node.js",
+        "PostgreSQL",
+        "Redis"
+      ]
+    },
+    {
+      "id": "frontend",
+      "title": "Frontend",
+      "items": [
+        "React",
+        "Next.js",
+        "TypeScript",
+        "Tailwind CSS"
+      ]
+    },
+    {
+      "id": "testing",
+      "title": "Testing & Tools",
+      "items": [
+        "Pytest",
+        "Docker",
+        "Git",
+        "REST APIs"
+      ]
+    }
+  ]
+}
