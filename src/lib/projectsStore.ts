@@ -1,6 +1,5 @@
-import { readFile, writeFile, mkdir } from "fs/promises";
 import path from "path";
-import { head, put } from "@vercel/blob";
+import { readJsonStore, writeJsonStore } from "@/lib/jsonStore";
 import type { ProjectDetail, ProjectsFile } from "@/types/project";
 import { FEATURED_HOME_MAX } from "@/types/project";
 import { SOCIAL_GITHUB } from "@/data/site";
@@ -49,57 +48,20 @@ export function applyDemoLinks(
   return file.projects.map((p) => withDemoLinks(p, file.githubRepoBySlug));
 }
 
-async function readFromBlob(): Promise<ProjectsFile | null> {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return null;
-  try {
-    const meta = await head(BLOB_PATHNAME);
-    const res = await fetch(meta.url, { cache: "no-store" });
-    if (!res.ok) return null;
-    return (await res.json()) as ProjectsFile;
-  } catch {
-    return null;
-  }
-}
-
-async function writeToBlob(data: ProjectsFile): Promise<void> {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    throw new Error("BLOB_READ_WRITE_TOKEN is not set");
-  }
-  await put(BLOB_PATHNAME, JSON.stringify(data, null, 2), {
-    access: "public",
-    addRandomSuffix: false,
-    allowOverwrite: true,
-    contentType: "application/json",
+export async function readProjectsFile(): Promise<ProjectsFile> {
+  return readJsonStore({
+    diskPath: DATA_PATH,
+    blobPathname: BLOB_PATHNAME,
+    defaultValue: defaultFile,
   });
 }
 
-async function readFromDisk(): Promise<ProjectsFile> {
-  try {
-    const raw = await readFile(DATA_PATH, "utf-8");
-    return JSON.parse(raw) as ProjectsFile;
-  } catch {
-    return defaultFile;
-  }
-}
-
-async function writeToDisk(data: ProjectsFile): Promise<void> {
-  await mkdir(path.dirname(DATA_PATH), { recursive: true });
-  await writeFile(DATA_PATH, JSON.stringify(data, null, 2), "utf-8");
-}
-
-export async function readProjectsFile(): Promise<ProjectsFile> {
-  const fromBlob = await readFromBlob();
-  if (fromBlob) return fromBlob;
-  return readFromDisk();
-}
-
 export async function writeProjectsFile(data: ProjectsFile): Promise<void> {
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
-    await writeToBlob(data);
-    await writeToDisk(data);
-    return;
-  }
-  await writeToDisk(data);
+  await writeJsonStore({
+    diskPath: DATA_PATH,
+    blobPathname: BLOB_PATHNAME,
+    data,
+  });
 }
 
 export function resolveFeaturedSlugs(file: ProjectsFile): string[] {

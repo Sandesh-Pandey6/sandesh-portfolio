@@ -35,15 +35,7 @@ export async function PUT(request: Request) {
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Could not save hero stats";
-    const onVercel = Boolean(process.env.VERCEL);
-    return NextResponse.json(
-      {
-        error: onVercel
-          ? `${message}. On Vercel, add BLOB_READ_WRITE_TOKEN or save locally.`
-          : message,
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 
   revalidatePath("/");

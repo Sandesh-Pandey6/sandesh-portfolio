@@ -35,15 +35,7 @@ export async function PUT(request: Request) {
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Could not save projects";
-    const onVercel = Boolean(process.env.VERCEL);
-    return NextResponse.json(
-      {
-        error: onVercel
-          ? `${message}. On Vercel, add a Blob store and set BLOB_READ_WRITE_TOKEN, or save while running locally (npm run dev).`
-          : message,
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 
   revalidatePath("/");

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import AdminBlobBanner from "@/components/admin/AdminBlobBanner";
 import AdminHeroEditor from "@/components/admin/AdminHeroEditor";
 import AdminLinesTextarea from "@/components/admin/AdminLinesTextarea";
 import AdminStackEditor from "@/components/admin/AdminStackEditor";
@@ -69,6 +70,7 @@ export default function AdminDashboard() {
   const [authenticated, setAuthenticated] = useState(false);
   const [configured, setConfigured] = useState(true);
   const [deployedOnVercel, setDeployedOnVercel] = useState(false);
+  const [blobConfigured, setBlobConfigured] = useState(true);
   const [loading, setLoading] = useState(true);
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -85,10 +87,12 @@ export default function AdminDashboard() {
       configured: boolean;
       authenticated: boolean;
       deployedOnVercel?: boolean;
+      blobConfigured?: boolean;
     };
     setConfigured(json.configured);
     setAuthenticated(json.authenticated);
     setDeployedOnVercel(Boolean(json.deployedOnVercel));
+    setBlobConfigured(json.blobConfigured !== false);
     setLoading(false);
     return json.authenticated;
   }, []);
@@ -320,6 +324,13 @@ export default function AdminDashboard() {
     );
   }
 
+  const blobBanner = (
+    <AdminBlobBanner
+      deployedOnVercel={deployedOnVercel}
+      blobConfigured={blobConfigured}
+    />
+  );
+
   if (adminPage === "stack") {
     return (
       <div className="admin-app">
@@ -328,6 +339,7 @@ export default function AdminDashboard() {
           onChange={setAdminPage}
           onLogout={() => void handleLogout()}
         />
+        {blobBanner}
         <AdminStackEditor />
       </div>
     );
@@ -341,6 +353,7 @@ export default function AdminDashboard() {
           onChange={setAdminPage}
           onLogout={() => void handleLogout()}
         />
+        {blobBanner}
         <AdminHeroEditor />
       </div>
     );
@@ -377,6 +390,8 @@ export default function AdminDashboard() {
         onChange={setAdminPage}
         onLogout={() => void handleLogout()}
       />
+
+      {blobBanner}
 
       <p className="admin-alert admin-alert--info admin-page-hint">
         Editing <strong>projects</strong>? Use the form below. For home page sections,

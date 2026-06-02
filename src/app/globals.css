@@ -2010,6 +2010,15 @@ html:has(.admin-shell).custom-cursor-active * {
   line-height: 1.6;
 }
 
+.admin-blob-banner {
+  margin-bottom: 1rem;
+}
+
+.admin-blob-banner__steps {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+}
+
 .admin-toolbar {
   display: flex;
   flex-wrap: wrap;

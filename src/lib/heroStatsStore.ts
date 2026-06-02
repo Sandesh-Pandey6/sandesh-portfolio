@@ -1,6 +1,5 @@
-import { readFile, writeFile, mkdir } from "fs/promises";
 import path from "path";
-import { head, put } from "@vercel/blob";
+import { readJsonStore, writeJsonStore } from "@/lib/jsonStore";
 import type { HeroStatsFile } from "@/types/heroStats";
 
 const DATA_PATH = path.join(process.cwd(), "data", "heroStats.json");
@@ -14,57 +13,20 @@ const defaultFile: HeroStatsFile = {
   ],
 };
 
-async function readFromBlob(): Promise<HeroStatsFile | null> {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return null;
-  try {
-    const meta = await head(BLOB_PATHNAME);
-    const res = await fetch(meta.url, { cache: "no-store" });
-    if (!res.ok) return null;
-    return (await res.json()) as HeroStatsFile;
-  } catch {
-    return null;
-  }
-}
-
-async function writeToBlob(data: HeroStatsFile): Promise<void> {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    throw new Error("BLOB_READ_WRITE_TOKEN is not set");
-  }
-  await put(BLOB_PATHNAME, JSON.stringify(data, null, 2), {
-    access: "public",
-    addRandomSuffix: false,
-    allowOverwrite: true,
-    contentType: "application/json",
+export async function readHeroStatsFile(): Promise<HeroStatsFile> {
+  return readJsonStore({
+    diskPath: DATA_PATH,
+    blobPathname: BLOB_PATHNAME,
+    defaultValue: defaultFile,
   });
 }
 
-async function readFromDisk(): Promise<HeroStatsFile> {
-  try {
-    const raw = await readFile(DATA_PATH, "utf-8");
-    return JSON.parse(raw) as HeroStatsFile;
-  } catch {
-    return defaultFile;
-  }
-}
-
-async function writeToDisk(data: HeroStatsFile): Promise<void> {
-  await mkdir(path.dirname(DATA_PATH), { recursive: true });
-  await writeFile(DATA_PATH, JSON.stringify(data, null, 2), "utf-8");
-}
-
-export async function readHeroStatsFile(): Promise<HeroStatsFile> {
-  const fromBlob = await readFromBlob();
-  if (fromBlob) return fromBlob;
-  return readFromDisk();
-}
-
 export async function writeHeroStatsFile(data: HeroStatsFile): Promise<void> {
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
-    await writeToBlob(data);
-    await writeToDisk(data);
-    return;
-  }
-  await writeToDisk(data);
+  await writeJsonStore({
+    diskPath: DATA_PATH,
+    blobPathname: BLOB_PATHNAME,
+    data,
+  });
 }
 
 export async function loadHeroStats(): Promise<HeroStatsFile> {
