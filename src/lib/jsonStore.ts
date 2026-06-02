@@ -1,6 +1,6 @@
 import { readFile, writeFile, mkdir } from "fs/promises";
 import path from "path";
-import { head, put } from "@vercel/blob";
+import { get, put } from "@vercel/blob";
 import {
   BLOB_SETUP_MESSAGE,
   hasBlobStorage,
@@ -12,10 +12,10 @@ export { BLOB_SETUP_MESSAGE, hasBlobStorage, isVercelDeployment };
 async function readFromBlob<T>(pathname: string): Promise<T | null> {
   if (!hasBlobStorage()) return null;
   try {
-    const meta = await head(pathname);
-    const res = await fetch(meta.url, { cache: "no-store" });
-    if (!res.ok) return null;
-    return (await res.json()) as T;
+    const result = await get(pathname, { access: "private" });
+    if (!result || result.statusCode !== 200 || !result.stream) return null;
+    const text = await new Response(result.stream).text();
+    return JSON.parse(text) as T;
   } catch {
     return null;
   }
@@ -49,7 +49,7 @@ export async function writeJsonStore<T>(opts: {
 
   if (hasBlobStorage()) {
     await put(opts.blobPathname, json, {
-      access: "public",
+      access: "private",
       addRandomSuffix: false,
       allowOverwrite: true,
       contentType: "application/json",
